@@ -27,3 +27,11 @@
 * Transcription: OpenAI Whisper
 
 * OCR: Tesseract OCR
+
+⚙️ Installation & Setup
+
+You must have the following system-level tools installed:
+
+* Tesseract OCR: Required for reading images.
+
+* FFmpeg: Required for processing video files.
