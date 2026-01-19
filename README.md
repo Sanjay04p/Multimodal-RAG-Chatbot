@@ -35,3 +35,14 @@ You must have the following system-level tools installed:
 * Tesseract OCR: Required for reading images.
 
 * FFmpeg: Required for processing video files.
+
+# working Sample
+
+
+https://github.com/user-attachments/assets/28dfd333-2609-4512-ae17-1e5f49bd4275
+
+
+
+
+
+
