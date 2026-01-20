@@ -1,5 +1,5 @@
 # 🚀 Features
-* Multimodal Ingestion: Extracts text from:
+* **Multimodal Ingestion**: Extracts text from:
 
 * PDFs: Using pypdf for structural text extraction.
 
@@ -32,9 +32,9 @@
 
 You must have the following system-level tools installed:
 
-* Tesseract OCR: Required for reading images.
+* **Tesseract OCR**: Required for reading images.
 
-* FFmpeg: Required for processing video files.
+* **FFmpeg**: Required for processing video files.
 
 # working Sample
 
