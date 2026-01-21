@@ -1,23 +1,12 @@
-# UI and Environment
 streamlit
 python-dotenv
-
-# LangChain and LLM
 langchain
 langchain-community
 langchain-groq
-
-# Vector Store and Embeddings
 faiss-cpu
 sentence-transformers
-
-# Document Loading (PDF and Text)
 pypdf
-
-# Image Processing (OCR)
 pytesseract
 Pillow
-
-# Video and Audio Processing
 openai-whisper
 moviepy
