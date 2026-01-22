@@ -1,10 +1,9 @@
 from pathlib import Path
 import pypdf
-
+import os
 import pytesseract
 from PIL import Image
 import whisper
-#from moviepy.editor import VideoFileClip
 from moviepy.video.io.VideoFileClip import VideoFileClip
 def load_text_files(folder):
     texts = []
@@ -39,9 +38,11 @@ whisper_model = whisper.load_model("base")
 def video_to_text(video_path):
     clip = VideoFileClip(video_path)
     audio_path = "temp_audio.wav"
-    clip.audio.write_audiofile(audio_path, verbose=False, logger=None)
+    clip.audio.write_audiofile(audio_path)
     result = whisper_model.transcribe(audio_path)
     clip.close() 
+    if os.path.exists(audio_path):
+        os.remove(audio_path)
     return result["text"]
 
 def load_videos(folder):
