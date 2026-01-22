@@ -5,9 +5,11 @@ import shutil
 from loaders import build_corpus
 from embed_store import build_vectorstore
 from rag import rag_chat
-
+from PIL import Image
 # Page Config
-st.set_page_config(page_title="Multimodal RAG Assistant", layout="wide")
+im=Image.open("logo.png")
+st.set_page_config(page_title="Multimodal RAG", page_icon="im",layout="wide")
+st.logo("logo.png",size="large")
 
 def save_uploaded_files(uploaded_files):
     """
