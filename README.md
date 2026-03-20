@@ -36,13 +36,7 @@ You must have the following system-level tools installed:
 
 * **FFmpeg**: Required for processing video files.
 
-# working Sample
-
-
-https://github.com/user-attachments/assets/28dfd333-2609-4512-ae17-1e5f49bd4275
-
-
-## 🏗️ RAG System Architecture
+# 🏗️ RAG System Architecture
 
 This project utilizes a complex Retrieval-Augmented Generation pipeline to process and unify text, images, and video into a single conversational interface.
 
@@ -51,6 +45,14 @@ This project utilizes a complex Retrieval-Augmented Generation pipeline to proce
 * **Multimodal Ingestion:** Routes uploads to specific parsers based on file type. Uses `OpenAI Whisper` for video/audio transcription and Tesseract OCR for image description.
 * **Vector Storage:** Converts all extracted text into high-dimensional embeddings and stores them in a `FAISS` vector database for rapid semantic search.
 * **Orchestration & Generation:** `LangChain` manages conversation memory and retrieves the Top-K most relevant context chunks to ground the `Llama 3.1` model, preventing hallucinations.
+
+# working Sample
+
+
+https://github.com/user-attachments/assets/28dfd333-2609-4512-ae17-1e5f49bd4275
+
+
+
 
 
 
