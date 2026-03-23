@@ -1,0 +1,14 @@
+streamlit
+python-dotenv
+langchain
+langchain-community
+langchain-groq
+faiss-cpu
+sentence-transformers
+pypdf
+pytesseract
+Pillow
+openai-whisper
+moviepy
+ragas
+datasets
