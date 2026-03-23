@@ -5,11 +5,12 @@ import shutil
 from loaders import build_corpus
 from embed_store import build_vectorstore
 from rag import rag_chat
-from PIL import Image 
+from PIL import Image
 # Page Config
 im=Image.open("logo.png")
 st.set_page_config(page_title="Multimodal RAG", page_icon="im",layout="wide")
-st.logo("logo.png",size="large")  
+st.logo("logo.png",size="large")
+
 def save_uploaded_files(uploaded_files):
     """
     Saves uploaded Streamlit files to a temporary directory 
@@ -23,7 +24,7 @@ def save_uploaded_files(uploaded_files):
     return temp_dir
 
 def main():
-    st.title("📚 Multimodal RAG Chatbot")
+    st.title("📄 Multimodal RAG Chatbot")
     st.markdown("Chat with your PDFs, Images, Videos, and Text files.")
 
     # Initialize Chat History

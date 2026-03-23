@@ -4,9 +4,7 @@ import os
 import pytesseract
 from PIL import Image
 import whisper
-#from moviepy.editor import VideoFileClip
 from moviepy.video.io.VideoFileClip import VideoFileClip
-
 def load_text_files(folder):
     texts = []
     for p in Path(folder).rglob("*.txt"):
