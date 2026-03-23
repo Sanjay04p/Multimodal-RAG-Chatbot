@@ -4,3 +4,4 @@ __pycache__/
 temp_audio.wav
 .venv/
 .vscode/
+rag_evaluation_proof.csv
