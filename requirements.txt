@@ -10,3 +10,6 @@ pytesseract
 Pillow
 openai-whisper
 moviepy
+transformers
+torch
+opencv-python-headless
