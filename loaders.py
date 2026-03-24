@@ -1,4 +1,6 @@
 import os
+import gc
+import streamlit as st
 from pathlib import Path
 import pypdf
 import pytesseract
@@ -8,20 +10,19 @@ from moviepy.video.io.VideoFileClip import VideoFileClip
 import cv2
 from transformers import BlipProcessor, BlipForConditionalGeneration
 
-# --- Initialize Models Globally ---
-print("Loading Whisper model...")
-whisper_model = whisper.load_model("base")
-
-print("Loading BLIP Image Captioning model...")
-blip_processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-base")
-blip_model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base")
+# --- Model Caching (Crucial for Streamlit Cloud) ---
+@st.cache_resource(show_spinner="Loading AI Models into memory...")
+def load_models():
+    w_model = whisper.load_model("base")
+    b_processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-base")
+    b_model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base")
+    return w_model, b_processor, b_model
 
 # --- Helper: Visual Captioning ---
-def caption_image(image):
-    """Generates a text description of a PIL Image."""
-    inputs = blip_processor(image, return_tensors="pt")
-    out = blip_model.generate(**inputs)
-    return blip_processor.decode(out[0], skip_special_tokens=True)
+def caption_image(image, processor, model):
+    inputs = processor(image, return_tensors="pt")
+    out = model.generate(**inputs)
+    return processor.decode(out[0], skip_special_tokens=True)
 
 # --- Text & PDF Loaders ---
 def load_text_files(folder):
@@ -34,21 +35,20 @@ def load_pdfs(folder):
     texts = []
     for p in Path(folder).rglob("*.pdf"):
         reader = pypdf.PdfReader(str(p))
-        content = []
-        for page in reader.pages:
-            content.append(page.extract_text() or "")
+        content = [page.extract_text() or "" for page in reader.pages]
         texts.append("\n".join(content))
     return texts
 
 # --- Image Loader (OCR + Caption) ---
 def image_to_text(img_path):
+    _, b_processor, b_model = load_models()
     img = Image.open(img_path).convert('RGB')
     
-    # 1. OCR for extracted text
     ocr_text = pytesseract.image_to_string(img).strip()
+    visual_caption = caption_image(img, b_processor, b_model)
     
-    # 2. BLIP for visual context
-    visual_caption = caption_image(img)
+    # Free up memory
+    img.close()
     
     combined_text = f"--- Image Document ---\nVisual Description: {visual_caption}\n"
     if ocr_text:
@@ -58,15 +58,14 @@ def image_to_text(img_path):
 
 def load_images(folder):
     texts = []
-    for p in Path(folder).rglob("*.png"):
-        texts.append(image_to_text(str(p)))
-    for p in Path(folder).rglob("*.jpg"):
-        texts.append(image_to_text(str(p)))
+    for ext in ["*.png", "*.jpg", "*.jpeg"]:
+        for p in Path(folder).rglob(ext):
+            texts.append(image_to_text(str(p)))
     return texts
 
 # --- Video Loader (Audio + Frame Captions) ---
-def extract_and_caption_frames(video_path, frame_interval_seconds=5):
-    """Extracts frames using OpenCV and captions them with BLIP."""
+def extract_and_caption_frames(video_path, frame_interval_seconds=10):
+    _, b_processor, b_model = load_models()
     vidcap = cv2.VideoCapture(video_path)
     fps = vidcap.get(cv2.CAP_PROP_FPS)
     
@@ -75,15 +74,17 @@ def extract_and_caption_frames(video_path, frame_interval_seconds=5):
     captions = []
     
     while success:
-        # Extract 1 frame per 'frame_interval_seconds'
+        # Extract 1 frame per 'frame_interval_seconds' (Increased to 10s to save RAM)
         if count % int(fps * frame_interval_seconds) == 0:
-            # Convert OpenCV BGR to standard RGB
             rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
             pil_img = Image.fromarray(rgb_image)
             
-            caption = caption_image(pil_img)
+            caption = caption_image(pil_img, b_processor, b_model)
             timestamp = int(count / fps)
             captions.append(f"[Frame at {timestamp}s]: {caption}")
+            
+            # Explicitly delete image arrays from memory
+            del rgb_image, pil_img
             
         success, image = vidcap.read()
         count += 1
@@ -92,28 +93,30 @@ def extract_and_caption_frames(video_path, frame_interval_seconds=5):
     return "\n".join(captions)
 
 def video_to_text(video_path):
-    # 1. Audio Transcription
-    clip = VideoFileClip(video_path)
-    audio_path = "temp_audio.wav"
-    clip.audio.write_audiofile(audio_path)
+    w_model, _, _ = load_models()
+    audio_path = f"temp_audio_{os.path.basename(video_path)}.wav"
     
-    transcript_result = whisper_model.transcribe(audio_path)
-    audio_text = transcript_result["text"]
-    
-    clip.close()
-    if os.path.exists(audio_path):
-        os.remove(audio_path)
+    try:
+        # 1. Audio Transcription
+        clip = VideoFileClip(video_path)
+        clip.audio.write_audiofile(audio_path, logger=None)
+        transcript_result = w_model.transcribe(audio_path)
+        audio_text = transcript_result["text"]
+        clip.close()
         
-    # 2. Visual Frame Captioning
-    visual_text = extract_and_caption_frames(video_path, frame_interval_seconds=5)
-    
-    # Combine
-    combined_text = (
-        f"--- Video Document ---\n"
-        f"Audio Transcription:\n{audio_text}\n\n"
-        f"Visual Event Timeline:\n{visual_text}\n"
-    )
-    return combined_text
+        # 2. Visual Frame Captioning
+        visual_text = extract_and_caption_frames(video_path, frame_interval_seconds=10)
+        
+        return (
+            f"--- Video Document ---\n"
+            f"Audio Transcription:\n{audio_text}\n\n"
+            f"Visual Event Timeline:\n{visual_text}\n"
+        )
+    finally:
+        # 3. Aggressive Cleanup
+        if os.path.exists(audio_path):
+            os.remove(audio_path)
+        gc.collect()
 
 def load_videos(folder):
     texts = []
