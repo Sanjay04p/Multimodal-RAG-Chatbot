@@ -11,7 +11,7 @@ import cv2
 from transformers import BlipProcessor, BlipForConditionalGeneration
 
 # --- Model Caching (Crucial for Streamlit Cloud) ---
-@st.cache_resource(show_spinner="Loading AI Models into memory...")
+@st.cache_resource
 def load_models():
     w_model = whisper.load_model("base")
     b_processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-base")
