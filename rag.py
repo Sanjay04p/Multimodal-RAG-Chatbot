@@ -6,7 +6,7 @@ api_key = os.getenv('API_KEY')
 from langchain_groq import ChatGroq
 
 
-llm=ChatGroq(api_key=api_key,model='llama-3.1-8b-instant')
+llm=ChatGroq(api_key=api_key,model='llama-3.3-70b-versatile')
 
 def build_history_text(history):
     lines = []
