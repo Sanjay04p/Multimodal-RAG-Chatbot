@@ -13,3 +13,4 @@ moviepy
 transformers
 torch
 opencv-python-headless
+torchvision
