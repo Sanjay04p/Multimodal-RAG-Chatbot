@@ -16,7 +16,7 @@ load_dotenv()
 api_key = os.getenv("API_KEY")
 
 # The AI "Judge" that will grade your bot
-judge_llm = ChatGroq(model="llama-3.3-70b-versatile", api_key=api_key, temperature=0)
+judge_llm = ChatGroq(model="llama-3.1-8b-instant", api_key=api_key, temperature=0)
 judge_embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 
 # --- 2. YOUR BENCHMARK DATASET ---
